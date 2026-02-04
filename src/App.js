@@ -1,118 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { setupInitialData } from './setupData';
-import { getDashboardSummary, getAllEnvelopes, getCategoriesByEnvelope, getEnvelopeTotal } from './database';
+import React, { useState } from 'react';
 import './App.css';
 
 function App() {
-  const [hasSetup, setHasSetup] = useState(false);
-  const [message, setMessage] = useState('Klik tombol untuk setup data awal');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSetup = async () => {
-    try {
-      setIsLoading(true);
-      setMessage('🍼 Lagi nyiapin data...');
-      const result = await setupInitialData();
-      
-      if (result.success) {
-        setMessage('✅ Data setup BERHASIL!');
-        setHasSetup(true); // Switch to dashboard
-      }
-    } catch (err) {
-      setMessage('❌ Fatal Error: ' + err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Show dashboard if setup is done
-  if (hasSetup) {
-    return <Dashboard />;
-  }
-
-  // Show setup page
-  return (
-    <div style={{ padding: '40px', textAlign: 'center' }}>
-      <h1>MoneyFlow Tracker</h1>
-      <p>{message}</p>
-      <button
-        onClick={handleSetup}
-        disabled={isLoading}
-        style={{
-          padding: '15px 30px',
-          fontSize: '16px',
-          background: '#2D5F4C',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          cursor: isLoading ? 'not-allowed' : 'pointer',
-          marginTop: '20px'
-        }}
-      >
-        {isLoading ? '⏳ Loading...' : '🚀 Setup Data Awal'}
-      </button>
-    </div>
-  );
+  return <Dashboard />;
 }
 
-// Dashboard Component
+// Dashboard dengan dummy data
 function Dashboard() {
-  const [summary, setSummary] = useState(null);
-  const [envelopes, setEnvelopes] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadDashboard();
-  }, []);
-
-  const loadDashboard = async () => {
-    try {
-      setLoading(true);
-      
-      // Get summary
-      const summaryData = await getDashboardSummary('2025-02');
-      setSummary(summaryData);
-      
-      // Get envelopes
-      const envelopesList = await getAllEnvelopes();
-      
-      // Get categories and total for each envelope
-      const envelopesWithData = await Promise.all(
-        envelopesList.map(async (envelope) => {
-          const categories = await getCategoriesByEnvelope(envelope.id);
-          const total = await getEnvelopeTotal(envelope.id, '2025-02');
-          return { envelope, categories, total };
-        })
-      );
-      
-      setEnvelopes(envelopesWithData);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error loading dashboard:', err);
-      setLoading(false);
-    }
+  // Dummy data
+  const summary = {
+    totalRemaining: 8750000,
+    totalIncome: 11000000,
+    totalExpense: 2250000,
+    budgetUtilization: 20.5,
+    overBudgetCount: 0
   };
 
-  if (loading) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h1>⏳ Loading Dashboard...</h1>
-      </div>
-    );
-  }
-
-  if (!summary) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h1>❌ No data found</h1>
-      </div>
-    );
-  }
+  const envelopes = [
+    {
+      envelope: { id: 1, name: 'Living Cost' },
+      total: 5800000,
+      categories: [
+        { id: 1, name: 'Makan', budget: 3000000, spent: 750000 },
+        { id: 2, name: 'Transport', budget: 1500000, spent: 300000 },
+        { id: 3, name: 'Skincare', budget: 500000, spent: 150000 },
+        { id: 4, name: 'Hangout', budget: 2000000, spent: 1000000 }
+      ]
+    },
+    {
+      envelope: { id: 2, name: 'Savings' },
+      total: 3950000,
+      categories: [
+        { id: 5, name: 'Dana Darurat', budget: 1500000, spent: 0 },
+        { id: 6, name: 'Investasi', budget: 2000000, spent: 50000 },
+        { id: 7, name: 'Dana Flexible', budget: 300000, spent: 0 },
+        { id: 8, name: 'Dana Buffer', budget: 200000, spent: 0 }
+      ]
+    }
+  ];
 
   return (
     <div style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
       <h1>💰 MoneyFlow Tracker</h1>
       <h2>Dashboard - Februari 2025</h2>
+      <p style={{ color: '#999', fontSize: '14px' }}>
+        ⚠️ Demo mode - Menggunakan dummy data (database belum siap)
+      </p>
       
       {/* Stats Cards */}
       <div style={{ 
@@ -159,20 +92,6 @@ function Dashboard() {
           />
         ))}
       </div>
-
-      {/* Alerts */}
-      {summary.overBudgetCount > 0 && (
-        <div style={{
-          marginTop: '30px',
-          padding: '15px 20px',
-          background: '#FFF8ED',
-          border: '2px solid #E8A87C',
-          borderRadius: '8px',
-          color: '#8B5A00'
-        }}>
-          ⚠️ <strong>Warning:</strong> {summary.overBudgetCount} kategori over budget bulan ini!
-        </div>
-      )}
     </div>
   );
 }
@@ -240,26 +159,67 @@ function EnvelopeCard({ envelope, total, categories }) {
 
       {/* Categories */}
       <div style={{ padding: '15px 25px 25px' }}>
-        {categories.map((cat) => (
-          <div 
-            key={cat.id}
-            style={{
-              padding: '15px 0',
-              borderBottom: '1px solid #F0EBE3'
-            }}
-          >
-            <div style={{ 
-              fontWeight: '600',
-              color: '#2C2C2C',
-              marginBottom: '5px'
-            }}>
-              {cat.name}
+        {categories.map((cat) => {
+          const remaining = cat.budget - cat.spent;
+          const percentage = (cat.spent / cat.budget) * 100;
+          
+          return (
+            <div 
+              key={cat.id}
+              style={{
+                padding: '15px 0',
+                borderBottom: '1px solid #F0EBE3'
+              }}
+            >
+              <div style={{ 
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: '8px'
+              }}>
+                <div>
+                  <div style={{ 
+                    fontWeight: '600',
+                    color: '#2C2C2C',
+                    marginBottom: '4px'
+                  }}>
+                    {cat.name}
+                  </div>
+                  <div style={{ fontSize: '13px', color: '#6B6B6B' }}>
+                    Sisa: Rp {remaining.toLocaleString('id-ID')} dari Rp {cat.budget.toLocaleString('id-ID')}
+                  </div>
+                </div>
+                <div style={{ 
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: percentage >= 90 ? '#D65D5D' : percentage >= 75 ? '#E8A87C' : '#2D5F4C'
+                }}>
+                  {percentage.toFixed(0)}%
+                </div>
+              </div>
+              
+              {/* Progress bar */}
+              <div style={{
+                width: '100%',
+                height: '6px',
+                background: '#F5F1EA',
+                borderRadius: '3px',
+                overflow: 'hidden'
+              }}>
+                <div style={{
+                  width: `${Math.min(percentage, 100)}%`,
+                  height: '100%',
+                  background: percentage >= 90 
+                    ? 'linear-gradient(90deg, #D65D5D 0%, #E87D7D 100%)'
+                    : percentage >= 75
+                    ? 'linear-gradient(90deg, #E8A87C 0%, #F5C9A0 100%)'
+                    : 'linear-gradient(90deg, #2D5F4C 0%, #3D7F6C 100%)',
+                  transition: 'width 0.5s ease'
+                }}></div>
+              </div>
             </div>
-            <div style={{ fontSize: '13px', color: '#6B6B6B' }}>
-              Budget: Rp 0 (belum ada data expense)
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

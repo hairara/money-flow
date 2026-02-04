@@ -12,17 +12,17 @@ class FinancialTrackerDB extends Dexie {
     super('FinancialTrackerDB');
     
     // Define schema version 1
-    this.version(1).stores({
-      envelopes: '++id, name',
-      categories: '++id, envelopeId, name, [envelopeId+name]',
-      budgets: '++id, categoryId, month, [categoryId+month]',
-      incomes: '++id, month, date, isAllocated',
-      allocations: '++id, incomeId, budgetId, type',
-      expenses: '++id, categoryId, month, date, isOverBudget',
-      subsidies: '++id, expenseId, fromCategoryId, toCategoryId, month',
-      carryovers: '++id, categoryId, fromMonth, toMonth',
-      monthlySnapshots: '++id, month'
-    });
+    this.version(2).stores({
+    envelopes: '++id, name, order',
+    categories: '++id, envelopeId, name, order, [envelopeId+name]',
+    budgets: '++id, categoryId, month, [categoryId+month]',
+    incomes: '++id, month, date, isAllocated',
+    allocations: '++id, incomeId, budgetId, type',
+    expenses: '++id, categoryId, month, date, isOverBudget',
+    subsidies: '++id, expenseId, fromCategoryId, toCategoryId, month',
+    carryovers: '++id, categoryId, fromMonth, toMonth',
+    monthlySnapshots: '++id, &month'
+  });
 
     // Define table references
     this.envelopes = this.table('envelopes');
