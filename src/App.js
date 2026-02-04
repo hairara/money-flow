@@ -1,45 +1,41 @@
-import React, { useState } from 'react';
-import { setupInitialData } from './setupData.js';
-import { useDashboard } from './hooks.js';
+import React, { useState, useEffect } from 'react';
+import { setupInitialData } from './setupData';
+import { getDashboardSummary, getAllEnvelopes, getCategoriesByEnvelope, getEnvelopeTotal } from './database';
 import './App.css';
 
 function App() {
-  const [showSetup, setShowSetup] = useState(false);
-  
-  return (
-    <div className="App">
-      {showSetup ? <SetupPage /> : <DashboardPage />}
-    </div>
-  );
-}
-
-// Setup Page Component
-function SetupPage() {
-  const [showSetup, setShowSetup] = useState(false);
+  const [hasSetup, setHasSetup] = useState(false);
   const [message, setMessage] = useState('Klik tombol untuk setup data awal');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSetup = async () => {
-    setIsLoading(true);
-    setMessage('Setting up data...');
-    
-    const result = await setupInitialData();
-    
-    if (result.success) {
-      setMessage('✅ Data setup berhasil! Refresh page untuk liat dashboard.');
-    } else {
-      setMessage('❌ Error: ' + result.error);
+    try {
+      setIsLoading(true);
+      setMessage('🍼 Lagi nyiapin data...');
+      const result = await setupInitialData();
+      
+      if (result.success) {
+        setMessage('✅ Data setup BERHASIL!');
+        setHasSetup(true); // Switch to dashboard
+      }
+    } catch (err) {
+      setMessage('❌ Fatal Error: ' + err.message);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
+  // Show dashboard if setup is done
+  if (hasSetup) {
+    return <Dashboard />;
+  }
+
+  // Show setup page
   return (
     <div style={{ padding: '40px', textAlign: 'center' }}>
-      <h1>MoneyFlow Tracker - Setup</h1>
+      <h1>MoneyFlow Tracker</h1>
       <p>{message}</p>
-      
-      <button 
+      <button
         onClick={handleSetup}
         disabled={isLoading}
         style={{
@@ -53,28 +49,54 @@ function SetupPage() {
           marginTop: '20px'
         }}
       >
-        {isLoading ? 'Loading...' : '🚀 Setup Data Awal'}
+        {isLoading ? '⏳ Loading...' : '🚀 Setup Data Awal'}
       </button>
     </div>
   );
 }
 
-// Dashboard Page Component
-function DashboardPage() {
-  const { summary, envelopeTotals, loading, error } = useDashboard('2025-02');
+// Dashboard Component
+function Dashboard() {
+  const [summary, setSummary] = useState(null);
+  const [envelopes, setEnvelopes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
+      
+      // Get summary
+      const summaryData = await getDashboardSummary('2025-02');
+      setSummary(summaryData);
+      
+      // Get envelopes
+      const envelopesList = await getAllEnvelopes();
+      
+      // Get categories and total for each envelope
+      const envelopesWithData = await Promise.all(
+        envelopesList.map(async (envelope) => {
+          const categories = await getCategoriesByEnvelope(envelope.id);
+          const total = await getEnvelopeTotal(envelope.id, '2025-02');
+          return { envelope, categories, total };
+        })
+      );
+      
+      setEnvelopes(envelopesWithData);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error loading dashboard:', err);
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
       <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h1>Loading Dashboard...</h1>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h1>Error: {error}</h1>
+        <h1>⏳ Loading Dashboard...</h1>
       </div>
     );
   }
@@ -82,8 +104,7 @@ function DashboardPage() {
   if (!summary) {
     return (
       <div style={{ padding: '40px', textAlign: 'center' }}>
-        <h1>No data found</h1>
-        <p>Please setup data first</p>
+        <h1>❌ No data found</h1>
       </div>
     );
   }
@@ -129,7 +150,7 @@ function DashboardPage() {
         gap: '30px',
         marginTop: '20px'
       }}>
-        {envelopeTotals.map(({ envelope, total, categories }) => (
+        {envelopes.map(({ envelope, total, categories }) => (
           <EnvelopeCard 
             key={envelope.id}
             envelope={envelope}
@@ -220,29 +241,25 @@ function EnvelopeCard({ envelope, total, categories }) {
       {/* Categories */}
       <div style={{ padding: '15px 25px 25px' }}>
         {categories.map((cat) => (
-          <CategoryItem key={cat.id} category={cat} />
+          <div 
+            key={cat.id}
+            style={{
+              padding: '15px 0',
+              borderBottom: '1px solid #F0EBE3'
+            }}
+          >
+            <div style={{ 
+              fontWeight: '600',
+              color: '#2C2C2C',
+              marginBottom: '5px'
+            }}>
+              {cat.name}
+            </div>
+            <div style={{ fontSize: '13px', color: '#6B6B6B' }}>
+              Budget: Rp 0 (belum ada data expense)
+            </div>
+          </div>
         ))}
-      </div>
-    </div>
-  );
-}
-
-// Category Item Component (simplified - no breakdown yet)
-function CategoryItem({ category }) {
-  return (
-    <div style={{
-      padding: '15px 0',
-      borderBottom: '1px solid #F0EBE3'
-    }}>
-      <div style={{ 
-        fontWeight: '600',
-        color: '#2C2C2C',
-        marginBottom: '5px'
-      }}>
-        {category.name}
-      </div>
-      <div style={{ fontSize: '13px', color: '#6B6B6B' }}>
-        Loading budget info...
       </div>
     </div>
   );
