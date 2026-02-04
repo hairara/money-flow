@@ -15,6 +15,7 @@ function App() {
 
 // Setup Page Component
 function SetupPage() {
+  const [showSetup, setShowSetup] = useState(false);
   const [message, setMessage] = useState('Klik tombol untuk setup data awal');
   const [isLoading, setIsLoading] = useState(false);
 
