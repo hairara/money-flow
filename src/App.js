@@ -3,7 +3,8 @@ import './App.css';
 
 function App() {
   return (
-    <div className="container">
+    <div style={{ padding: 40 }} 
+      className="container">
       <h1>Dashboard</h1>
       <p>UI dulu hidup, data nyusul</p>
     </div>
