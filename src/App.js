@@ -1,10 +1,11 @@
 import React from 'react';
+import './App.css';
 
 function App() {
   return (
-    <div style={{ padding: 40 }}>
-      <h1>React HIDUP 🔥</h1>
-      <p>Kalo ini muncul, berarti masalah di logic sebelumnya</p>
+    <div className="container">
+      <h1>Dashboard</h1>
+      <p>UI dulu hidup, data nyusul</p>
     </div>
   );
 }
