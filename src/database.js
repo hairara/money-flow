@@ -240,7 +240,7 @@ export const getBudgetsByMonth = async (month) => {
 
 // ===== INCOME OPERATIONS =====
 export async function addIncome(data) {
-  const db = await openDB();
+  const db = await initDB();
   const tx = db.transaction("income", "readwrite");
   const store = tx.objectStore("income");
 
@@ -255,7 +255,7 @@ export async function addIncome(data) {
 
 
 export async function getIncome() {
-  const db = await openDB();
+  const db = await initDB();
   const tx = db.transaction("income", "readonly");
   const store = tx.objectStore("income");
 
