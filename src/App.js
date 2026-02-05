@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./App.css";
+import "./App copy.css";
 import { addIncome, getIncome } from "./database";
 
 
