@@ -568,4 +568,13 @@ export const exportAllData = async () => {
   return data;
 };
 
-export default { initDB };
+const database = {
+  initDB,
+  addIncome,
+  getIncome,
+  createCategory,
+  createPocket,
+};
+
+
+export default database;
