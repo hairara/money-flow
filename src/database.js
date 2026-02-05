@@ -239,6 +239,15 @@ export const getBudgetsByMonth = async (month) => {
 };
 
 // ===== INCOME OPERATIONS =====
+export async function addIncome(data) {
+  console.warn("addIncome belum diimplementasi", data);
+}
+
+export async function getIncome() {
+  console.warn("getIncome belum diimplementasi");
+  return [];
+}
+
 export const createIncome = async (date, source, amount, note = '') => {
   const db = await initDB();
   const dateStr = formatDate(date);
@@ -307,6 +316,15 @@ export const markIncomeAsAllocated = async (incomeId) => {
     getRequest.onerror = () => reject(getRequest.error);
   });
 };
+
+
+
+// ===== POCKET OPERATIONS =====
+export async function createPocket(data) {
+  console.warn("createPocket belum diimplementasi", data);
+}
+
+
 
 // ===== ALLOCATION OPERATIONS =====
 export const allocateIncomeToBudgets = async (incomeId, allocations, type = 'income') => {
