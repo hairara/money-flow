@@ -18,4 +18,24 @@ function App() {
   );
 }
 
+import React, { useState } from 'react';
+
+function App() {
+  const [name, setName] = useState('');
+  const [amount, setAmount] = useState('');
+
+  const handleSubmit = () => {
+    console.log('SUBMIT:', name, amount);
+  };
+
+  return (
+    <>
+      <input onChange={(e) => setName(e.target.value)} />
+      <input onChange={(e) => setAmount(e.target.value)} />
+      <button onClick={handleSubmit}>Simpan Income</button>
+    </>
+  );
+}
+
+
 export default App;
