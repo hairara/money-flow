@@ -3,10 +3,17 @@ import './App.css';
 
 function App() {
   return (
-    <div style={{ padding: 40 }} 
-      className="container">
-      <h1>Dashboard</h1>
-      <p>UI dulu hidup, data nyusul</p>
+    <div style={{ padding: 40 }} className="container">
+      <h1>MoneyFlow</h1>
+
+      <section className="card">
+        <h3>Tambah Income</h3>
+
+        <input placeholder="Nama income" />
+        <input placeholder="Nominal" />
+
+        <button>Simpan Income</button>
+      </section>
     </div>
   );
 }
