@@ -240,13 +240,29 @@ export const getBudgetsByMonth = async (month) => {
 
 // ===== INCOME OPERATIONS =====
 export async function addIncome(data) {
-  console.warn("addIncome belum diimplementasi", data);
+  const db = await openDB();
+  const tx = db.transaction("income", "readwrite");
+  const store = tx.objectStore("income");
+
+  store.add({
+    id: Date.now(),
+    ...data,
+    createdAt: Date.now(),
+  });
+
+  await tx.done;
 }
 
+
 export async function getIncome() {
-  console.warn("getIncome belum diimplementasi");
-  return [];
+  const db = await openDB();
+  const tx = db.transaction("income", "readonly");
+  const store = tx.objectStore("income");
+
+  return await store.getAll();
 }
+
+
 
 export const createIncome = async (date, source, amount, note = '') => {
   const db = await initDB();
