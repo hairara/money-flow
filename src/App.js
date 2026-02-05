@@ -1,5 +1,6 @@
 import React from 'react';
 import './App.css';
+import { createIncome } from './database';
 
 function App() {
   return <Dashboard />;
@@ -7,6 +8,26 @@ function App() {
 
 // Dashboard dengan dummy data
 function Dashboard() {
+  // state income (REAL INPUT)
+  const [incomeName, setIncomeName] = useState('');
+  const [incomeAmount, setIncomeAmount] = useState('');
+
+  const handleAddIncome = async () => {
+  if (!incomeName || !incomeAmount) return;
+
+  await createIncome(
+    new Date().toISOString().slice(0, 10),
+    incomeName,
+    Number(incomeAmount),
+    ''
+  );
+
+  setIncomeName('');
+  setIncomeAmount('');  
+
+  alert('Income tersimpan ✅');
+    };
+
   // Dummy data
   const summary = {
     totalRemaining: 8750000,
@@ -40,12 +61,28 @@ function Dashboard() {
   ];
 
   return (
-    <div style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
-      <h1>💰 MoneyFlow Tracker</h1>
-      <h2>Dashboard - Februari 2025</h2>
-      <p style={{ color: '#999', fontSize: '14px' }}>
-        ⚠️ Demo mode - Menggunakan dummy data (database belum siap)
-      </p>
+    <div style={{ marginTop: '40px', textAlign: 'left' }}>
+    <h2>📊 Dashboard</h2>
+
+    <h3>➕ Tambah Income</h3>
+    <input
+      type="text"
+      placeholder="Nama income"
+      value={incomeName}
+      onChange={e => setIncomeName(e.target.value)}
+    />
+    <br /><br />
+    <input
+      type="number"
+      placeholder="Nominal"
+      value={incomeAmount}
+      onChange={e => setIncomeAmount(e.target.value)}
+    />
+    <br /><br />
+    <button onClick={handleAddIncome}>
+      Simpan Income
+    </button>
+
       
       {/* Stats Cards */}
       <div style={{ 
